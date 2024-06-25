@@ -1,7 +1,14 @@
 package org.koreait;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class Calc {
     public static int run(String exp) {
+        // 단일항이 들어오면 바로 리턴
+        if (!exp.contains(" ")) {
+            return Integer.parseInt(exp);
+        }
 
         boolean needToMulti = exp.contains("*");
         boolean needToPlus = exp.contains("+");
@@ -11,7 +18,12 @@ public class Calc {
         if (needToCompound) {
             String[] bits = exp.split(" \\+ ");
 
-            return Integer.parseInt(bits[0]) + run(bits[1]);
+            String newExp = Arrays.stream(bits)
+                    .mapToInt(Calc::run)
+                    .mapToObj(e -> e + "")
+                    .collect(Collectors.joining(" + "));
+
+            return run(newExp);
         }
 
         if (needToPlus) {
@@ -37,6 +49,7 @@ public class Calc {
 
             return sum;
         }
+
         throw new RuntimeException("해석 불가 : 올바른 계산식이 아니야");
     }
 }
