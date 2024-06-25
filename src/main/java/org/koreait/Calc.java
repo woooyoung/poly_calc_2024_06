@@ -6,6 +6,14 @@ public class Calc {
         boolean needToMulti = exp.contains("*");
         boolean needToPlus = exp.contains("+");
 
+        boolean needToCompound = needToMulti && needToPlus;
+
+        if (needToCompound) {
+            String[] bits = exp.split(" \\+ ");
+
+            return Integer.parseInt(bits[0]) + run(bits[1]);
+        }
+
         if (needToPlus) {
             exp = exp.replaceAll("- ", "+ -");
 
