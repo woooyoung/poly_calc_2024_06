@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class Calc {
     public static int run(String exp) {
-        // (20 + 20) + 20
+        // 10 + (10 + 5)
         exp = exp.trim(); // 양 옆의 쓸데없는 공백 제거
         // 괄호 제거
         exp = stripOuterBrackets(exp);
@@ -21,24 +21,12 @@ public class Calc {
         boolean needToCompound = needToMulti && needToPlus;
 
         if (needToSplit) {
-            int bracketsCount = 0;
-            int splitPointIndex = -1;
+            int splitPointIndex = findSplitPointIndex(exp);
 
-            for (int i = 0; i < exp.length(); i++) {
-                if (exp.charAt(i) == '(') {
-                    bracketsCount++;
-                } else if (exp.charAt(i) == ')') {
-                    bracketsCount--;
-                }
-                if (bracketsCount == 0) {
-                    splitPointIndex = i;
-                    break;
-                }
-            }
-            String firstExp = exp.substring(0, splitPointIndex + 1);
-            String secondExp = exp.substring(splitPointIndex + 4);
+            String firstExp = exp.substring(0, splitPointIndex);
+            String secondExp = exp.substring(splitPointIndex + 1);
 
-            char operator = exp.charAt(splitPointIndex + 2);
+            char operator = exp.charAt(splitPointIndex);
 
             exp = Calc.run(firstExp) + " " + operator + " " + Calc.run(secondExp);
 
@@ -46,10 +34,7 @@ public class Calc {
         } else if (needToCompound) {
             String[] bits = exp.split(" \\+ ");
 
-            String newExp = Arrays.stream(bits)
-                    .mapToInt(Calc::run)
-                    .mapToObj(e -> e + "")
-                    .collect(Collectors.joining(" + "));
+            String newExp = Arrays.stream(bits).mapToInt(Calc::run).mapToObj(e -> e + "").collect(Collectors.joining(" + "));
 
             return run(newExp);
         }
@@ -79,6 +64,31 @@ public class Calc {
         }
 
         throw new RuntimeException("해석 불가 : 올바른 계산식이 아니야");
+    }
+
+    private static int findSplitPointIndex(String exp) {
+        int index = findSplitPointIndexBy(exp, '+');
+
+        if (index >= 0) return index;
+
+        return findSplitPointIndexBy(exp, '*');
+    }
+
+    private static int findSplitPointIndexBy(String exp, char findChar) {
+        int brackesCount = 0;
+
+        for (int i = 0; i < exp.length(); i++) {
+            char c = exp.charAt(i);
+
+            if (c == '(') {
+                brackesCount++;
+            } else if (c == ')') {
+                brackesCount--;
+            } else if (c == findChar) {
+                if (brackesCount == 0) return i;
+            }
+        }
+        return -1;
     }
 
     private static String stripOuterBrackets(String exp) {
