@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 public class Calc {
     public static int run(String exp) {
         // (20 + 20) + 20
+        exp = exp.trim(); // 양 옆의 쓸데없는 공백 제거
         // 괄호 제거
         exp = stripOuterBrackets(exp);
 
@@ -37,8 +38,11 @@ public class Calc {
             String firstExp = exp.substring(0, splitPointIndex + 1);
             String secondExp = exp.substring(splitPointIndex + 4);
 
-            return Calc.run(firstExp) + Calc.run(secondExp);
+            char operator = exp.charAt(splitPointIndex + 2);
 
+            exp = Calc.run(firstExp) + " " + operator + " " + Calc.run(secondExp);
+
+            return Calc.run(exp);
         } else if (needToCompound) {
             String[] bits = exp.split(" \\+ ");
 
